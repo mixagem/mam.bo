@@ -4,7 +4,7 @@
     const mamboGridElements = {
         // linha genérica
         linha: function (previousStepNo, nextStepNo) {
-            const linha = mamboGridFunctions.ele('div', '', 'row align-items-center step')
+            const linha = mamboGridFunctions.ele('div', '', 'row align-items-center step animate__animated animate__fadeInUp')
             // caso não existe proximo passo
             if (isNaN(nextStepNo)) {
                 linha.appendChild(mamboGridFunctions.ele('div', '', 'col-sm-1 fixed', `${Math.floor(previousStepNo) + 1}`))
@@ -49,6 +49,7 @@
             inputDiv.appendChild(document.createElement('p'));
             inputDiv.lastChild.innerHTML = desc;
             inputDiv.appendChild(document.createElement('input'));
+            // def =  o valor default do input, não obrigatório
             inputDiv.lastChild.value = def;
             return inputDiv
         },
@@ -80,55 +81,55 @@
         },
         // template para a ação focus
         focusTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Caminho XPATH'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Caminho XPATH'), mamboGridElements.lastDiv()])
         },
         // template para a ação write
         writeTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Texto a escrever'), mamboGridElements.blank(1), mamboGridElements.input('Caminho XPATH <span>(opcional)</span>'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Texto a escrever'), mamboGridElements.blank(1), mamboGridElements.input('Caminho XPATH <span>(opcional)</span>'), mamboGridElements.lastDiv()])
         },
         // template para a ação limpar
         clearTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('XPATH <span>(opcional)</span>'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('XPATH <span>(opcional)</span>'), mamboGridElements.lastDiv()])
         },
         // template para a ação delay
         delayTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Tempo <span>(segundos)</span>'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Tempo <span>(segundos)</span>'), mamboGridElements.lastDiv()])
         },
         // template para a ação waitfor
         waitforTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Caminho XPATH'), mamboGridElements.blank(1), mamboGridElements.input('Texto a procurar <span>(opcional)</span>'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Caminho XPATH'), mamboGridElements.blank(1), mamboGridElements.input('Texto a procurar <span>(opcional)</span>'), mamboGridElements.lastDiv()])
         },
         // template para a ação mouse click
         mouseclickTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Caminho XPATH'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Caminho XPATH'), mamboGridElements.lastDiv()])
         },
         // template para a ação mouse over
         mouseoverTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Caminho XPATH'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Caminho XPATH'), mamboGridElements.lastDiv()])
         },
         // template para a ação backspace
         pressBackspaceTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Backspaces <span>(default = 1)</span>', 1), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Backspaces <span>(default = 1)</span>', 1), mamboGridElements.lastDiv()])
         },
         // template para a ação enter
         pressEnterTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.lastDiv()])
         },
         // template para a ação tab
         pressTabTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.lastDiv()])
         },
         // template para a ação alternar janela
         changeTabTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Identificação da janela'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Identificação da janela'), mamboGridElements.lastDiv()])
         },
         // template para a ação navegar para url
         goToURLTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('URL destino'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('URL destino'), mamboGridElements.lastDiv()])
         },
         // template para a ação abrir novo separador
         newTabTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('URL destino <span>(do novo separador)</span>'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('URL destino <span>(do novo separador)</span>'), mamboGridElements.lastDiv()])
         },
     }
     const mamboGridFunctions = {
@@ -185,12 +186,21 @@
             mamboGridFunctions.orderSteps();
             mamboGridFunctions.addPlaceholders();
             mamboEventListeners.actionChange();
+            mamboGridFunctions.howManyCases();
         },
         // função para remover um step
         removeStep: function (e) {
+            // verificar se é o último step
+            const allSteps = document.querySelector('#my-steps-container').children
+            if (allSteps.length <= 1) { 
+                alert('Não posso remover o último passo')
+                return
+            }
+            // caso não seja...
             const linha = e.target.parentElement.parentElement.parentElement.parentElement.parentElement
             linha.remove();
             mamboGridFunctions.orderSteps();
+            mamboGridFunctions.howManyCases();
         },
         // função para ordenar os steps 
         orderSteps: function () {
@@ -199,11 +209,34 @@
                 allSteps[i].firstElementChild.innerHTML = `<p>${i + 1}</p>`
             }
         },
+        // valores default para os campos de descrição
         addPlaceholders: function () {
             const descPlaceHolders = document.querySelectorAll('.row.align-items-center.step>div:nth-child(2) input')
             for (desc of descPlaceHolders) {
                 desc.setAttribute('placeholder', '-- inserir descrição --')
             }
+        },
+        // função que conta o número de casos (excepto o primeiro)
+        howManyCases: function () {
+            const allSteps = document.querySelector('#my-steps-container').children
+            return (allSteps.length > 1 ? mamboGridFunctions.toogleJSONInputs('multi') : mamboGridFunctions.toogleJSONInputs('single'))
+        },
+        // função que esconde o botão para carregar json
+        toogleJSONInputs: function (action) {
+            switch (action) {
+                case 'single':
+                    document.querySelector('#json-load').classList.remove('no-display')
+                    document.querySelector('#load-json').classList.remove('no-display')
+                    document.querySelector('#get-json').classList.add('no-display')
+                    break;
+
+                case 'multi':
+                    document.querySelector('#json-load').classList.add('no-display')
+                    document.querySelector('#load-json').classList.add('no-display')
+                    document.querySelector('#get-json').classList.remove('no-display')
+                    break;
+            }
+
         },
         // createElement turbinada
         ele: function (ele, id = '', cla = '', inn = '', val = '') {
@@ -220,6 +253,16 @@
             e.preventDefault();
             const allSteps = document.querySelector('#my-steps-container').children
             const allStepsValues = [];
+
+            // caso existam linhas não definidas, mostra aviso
+            for (isDefined of allSteps) {
+                console.log(isDefined)
+                if (isDefined.children.length <= 3) {
+                    alert('Existem passos não parametrizados')
+                    return
+                }
+            }
+
             for (step of allSteps) {
                 let stepID = step.children[0].innerText //id
                 let stepDesc = step.children[1].firstElementChild.value // descrição
@@ -260,7 +303,7 @@
             if (files.length > 0) {
                 formData.append('file', files[0]);
                 $.ajax({
-                    url: '../mambo/php/json-load.php',
+                    url: './gui-assets/php/json-load.php',
                     type: 'post',
                     data: formData,
                     contentType: false,
