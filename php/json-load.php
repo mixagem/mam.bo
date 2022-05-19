@@ -26,7 +26,8 @@ if (isset($_FILES['file']['name'])) {
             // faz upload do icheiro
             if (move_uploaded_file($_FILES['file']['tmp_name'], $location)) {
                 // devolve o array para a aplicação
-                echo file_get_contents($location);
+                $json = json_decode(file_get_contents($location), true);
+                echo json_encode($json);
                 // apaga o ficheiro
                 unlink($location);
             }

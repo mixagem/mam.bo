@@ -1,7 +1,6 @@
 (function mamboWrapper() {
 
     const mamboVariables = {
-        currentSteps: 1
     }
     const mamboGridElements = {
         // linha genérica
@@ -32,6 +31,7 @@
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'MAMBO: Esperar por', 'waitfor'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Mouse: Click', 'mouse-click'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Mouse: Over', 'mouse-over'));
+            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Tecla: Backspace', 'key-backspace'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Tecla: Enter', 'key-enter'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Tecla: Tab', 'key-tab'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Alternar janela', 'chrome-window-change'));
@@ -46,12 +46,13 @@
             return col
         },
         // elemento genérico do tipo input
-        input: function (desc) {
+        input: function (desc, def = 1) {
             const inputDiv = document.createElement('div');
             inputDiv.classList = 'col-sm-3 input-div';
             inputDiv.appendChild(document.createElement('p'));
             inputDiv.lastChild.innerHTML = desc;
             inputDiv.appendChild(document.createElement('input'));
+            inputDiv.lastChild.value = def;
             return inputDiv
         },
         // elemento final, com as ações para adicionar / remover step
@@ -110,6 +111,10 @@
         mouseoverTemplate: function () {
             return mamboGridElements.mergeToTemplate([mamboGridElements.input('Caminho XPATH'), mamboGridElements.lastDiv()])
         },
+        // template para a ação backspace
+        pressBackspaceTemplate: function () {
+            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Backspaces <span>(default = 1)</span>', 1), mamboGridElements.lastDiv()])
+        },
         // template para a ação enter
         pressEnterTemplate: function () {
             return mamboGridElements.mergeToTemplate([mamboGridElements.lastDiv()])
@@ -160,6 +165,8 @@
                     break;
                 case 'mouse-over': actionRow.appendChild(mamboGridElements.mouseoverTemplate())
                     break;
+                case 'key-backspace': actionRow.appendChild(mamboGridElements.pressBackspaceTemplate())
+                    break;
                 case 'key-enter': actionRow.appendChild(mamboGridElements.pressEnterTemplate())
                     break;
                 case 'key-tab': actionRow.appendChild(mamboGridElements.pressTabTemplate())
@@ -174,7 +181,6 @@
         },
         // função para adicionar um novo step
         addStep: function (e) {
-            mamboVariables.currentSteps++;
             const linha = e.target.parentElement.parentElement.parentElement.parentElement.parentElement
             const previousStepNo = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.firstElementChild.innerHTML
             let nextStepNo;
@@ -188,11 +194,6 @@
         },
         // função para remover um step
         removeStep: function (e) {
-            if (mamboVariables.currentSteps === 1) {
-                alert("Não posso elinimar o último passo")
-                return
-            }
-            mamboVariables.currentSteps--;
             const linha = e.target.parentElement.parentElement.parentElement.parentElement.parentElement
             linha.remove();
             mamboGridFunctions.orderSteps();
@@ -233,10 +234,10 @@
     }
 
     const mamboJSONFunctions = {
-        createJSON: function () {
+        createJSON: function (e) {
+            e.preventDefault();
             const allSteps = document.querySelector('#my-steps-container').children
             const allStepsValues = [];
-
             for (step of allSteps) {
                 let stepID = step.children[0].innerText //id
                 let stepDesc = step.children[1].firstElementChild.value // descrição
@@ -269,26 +270,88 @@
             // Save the file
             saveAs(downloadJSON, 'mambo.json');
         },
-        loadJSON: function () {
+        loadJSON: function (e) {
+            e.preventDefault();
             const formData = new FormData();
             const files = $('#json-load')[0].files;
             // Check file selected or not
             if (files.length > 0) {
                 formData.append('file', files[0]);
                 $.ajax({
-                    url: '../php/json-load.php',
+                    url: '../mambo/php/json-load.php',
                     type: 'post',
                     data: formData,
                     contentType: false,
                     processData: false,
+                    // recebemos o array de steps, formatado de igual maneira que foi guardado
                     success: function (response) {
-                        console.log(response)
+                        mamboJSONFunctions.refreshMAMBO(JSON.parse(response))
                     },
                 });
             } else { alert("Não foi selecionado nenhum script."); }
+        },
+        refreshMAMBO: function (stepsArray) {
+            document.querySelector('#my-steps-container').innerHTML = '';
+            for (step of stepsArray) {
+                // criar uma nova linha com base na template
+                newStep = document.querySelector('#my-steps-container').appendChild(mamboGridElements.linha());
+
+                // alterar a ordem, descrição e açao do step
+                newStep.children[0].innerHTML = `<p>${step[0]}</p>`
+                newStep.children[1].firstChild.value = step[1]
+                newStep.children[2].firstChild.value = step[2]
+
+                // fazer switch case para introduzir na linha os inputs da ação selecionada
+                switch (step[2]) {
+                    case 'focus': newStep.appendChild(mamboGridElements.focusTemplate())
+                        break;
+                    case 'write': newStep.appendChild(mamboGridElements.writeTemplate())
+                        break;
+                    case 'clear': newStep.appendChild(mamboGridElements.clearTemplate())
+                        break;
+                    case 'delay': newStep.appendChild(mamboGridElements.delayTemplate())
+                        break;
+                    case 'waitfor': newStep.appendChild(mamboGridElements.waitforTemplate())
+                        break;
+                    case 'mouse-click': newStep.appendChild(mamboGridElements.mouseclickTemplate())
+                        break;
+                    case 'mouse-over': newStep.appendChild(mamboGridElements.mouseoverTemplate())
+                        break;
+                    case 'key-backspace': newStep.appendChild(mamboGridElements.pressBackspaceTemplate())
+                        break;
+                    case 'key-enter': newStep.appendChild(mamboGridElements.pressEnterTemplate())
+                        break;
+                    case 'key-tab': newStep.appendChild(mamboGridElements.pressTabTemplate())
+                        break;
+                    case 'chrome-window-change': newStep.appendChild(mamboGridElements.changeTabTemplate())
+                        break;
+                    case 'chrome-goto-url': newStep.appendChild(mamboGridElements.goToURLTemplate())
+                        break;
+                    case 'chrome-new-tab': newStep.appendChild(mamboGridElements.newTabTemplate())
+                        break;
+                }
+
+                // selecionar os inputs que existem na template
+                const actionInputsWrappers = newStep.children[3].firstChild.children
+
+                // array para guardar os valores para os inputs da ação selecioanda
+                const actionInputs = [];
+                for (isInput of actionInputsWrappers) {
+                    if (!isInput.classList.contains('add-remove-step') && !isInput.classList.contains('mambo-blank')) {
+                        actionInputs.push(isInput)
+                    }
+                }
+
+                // iniciar o contador no 3, porque os primeiros 3 elementos do step já estão definidos
+                let i = 3;
+                for (input of actionInputs) {
+                    input.lastChild.value = step[i]
+                    i++;
+                }
+            }
+            mamboEventListeners.actionChange();
         }
     }
-
 
     const mamboEventListeners = {
         actionChange: function () {
@@ -296,7 +359,8 @@
                 select.addEventListener('change', mamboGridFunctions.actionChange)
             }
         },
-        mamboJSON: document.querySelector('#get-json').addEventListener('click', mamboJSONFunctions.createJSON)
+        mamboJSONLoad: document.querySelector('#get-json').addEventListener('click', mamboJSONFunctions.createJSON),
+        mamboJSONWrite: document.querySelector('#load-json').addEventListener('click', mamboJSONFunctions.loadJSON)
     }
     mamboEventListeners.actionChange();
 })();
