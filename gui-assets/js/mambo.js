@@ -1,23 +1,20 @@
 (function mamboWrapper() {
-
     const mamboVariables = {
     }
     const mamboGridElements = {
         // linha genérica
         linha: function (previousStepNo, nextStepNo) {
-
-
             const linha = mamboGridFunctions.ele('div', '', 'row align-items-center step')
-
+            // caso não existe proximo passo
             if (isNaN(nextStepNo)) {
                 linha.appendChild(mamboGridFunctions.ele('div', '', 'col-sm-1 fixed', `${Math.floor(previousStepNo) + 1}`))
             }
+            // caso exista caso seguinte
             else if (Number.isInteger(previousStepNo) && Number.isInteger(nextStepNo)) {
                 linha.appendChild(mamboGridFunctions.ele('div', '', 'col-sm-1 fixed', `${Math.floor(previousStepNo) + .5}`))
             } else {
                 return console.log('something went wrong mix')
             }
-
             linha.appendChild(mamboGridFunctions.ele('div', '', 'col-sm-2 fixed'))
             linha.lastChild.appendChild(mamboGridFunctions.ele('input'))
             linha.appendChild(mamboGridFunctions.ele('div', '', 'col-sm-2 fixed'))
@@ -46,7 +43,7 @@
             return col
         },
         // elemento genérico do tipo input
-        input: function (desc, def = 1) {
+        input: function (desc, def = '') {
             const inputDiv = document.createElement('div');
             inputDiv.classList = 'col-sm-3 input-div';
             inputDiv.appendChild(document.createElement('p'));
@@ -76,9 +73,7 @@
             const focusWrapper = document.createElement('div')
             focusWrapper.classList = 'row';
             // adicionar os elementos da ação ao div
-            for (ele of arrayToMerge) {
-                focusWrapper.appendChild(ele)
-            }
+            for (ele of arrayToMerge) { focusWrapper.appendChild(ele) }
             // adicionar a row com os elementos da ação ao Col 7
             finalWrapper.appendChild(focusWrapper)
             return finalWrapper
@@ -97,7 +92,7 @@
         },
         // template para a ação delay
         delayTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Tempo <span>(milisegundos)</span>'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.input('Tempo <span>(segundos)</span>'), mamboGridElements.lastDiv()])
         },
         // template para a ação waitfor
         waitforTemplate: function () {
@@ -136,7 +131,6 @@
             return mamboGridElements.mergeToTemplate([mamboGridElements.input('URL destino <span>(do novo separador)</span>'), mamboGridElements.lastDiv()])
         },
     }
-
     const mamboGridFunctions = {
         // limpa os inputs da ação anterior
         clearPreviousActionTemplate: function (actionRow) {
@@ -200,21 +194,10 @@
         },
         // função para ordenar os steps 
         orderSteps: function () {
-            // const allSteps = document.querySelector('#my-steps-container').children;
-            // let orderObj = {};
-            // for (step of allSteps) {
-            //     let stepNo = step.firstElementChild.innerText;
-            //     orderObj[stepNo] = step;
-            // }
-            // const orderedSteps = Object.values(orderObj)
-            // for (step of orderedSteps) {
-            //     document.querySelector('#my-steps-container').appendChild(step)
-            // }
             const allSteps = document.querySelector('#my-steps-container').children;
             for (i = 0; i < allSteps.length; i++) {
                 allSteps[i].firstElementChild.innerHTML = `<p>${i + 1}</p>`
             }
-
         },
         addPlaceholders: function () {
             const descPlaceHolders = document.querySelectorAll('.row.align-items-center.step>div:nth-child(2) input')
@@ -232,7 +215,6 @@
             return mambito
         },
     }
-
     const mamboJSONFunctions = {
         createJSON: function (e) {
             e.preventDefault();
@@ -295,12 +277,10 @@
             for (step of stepsArray) {
                 // criar uma nova linha com base na template
                 newStep = document.querySelector('#my-steps-container').appendChild(mamboGridElements.linha());
-
                 // alterar a ordem, descrição e açao do step
                 newStep.children[0].innerHTML = `<p>${step[0]}</p>`
                 newStep.children[1].firstChild.value = step[1]
                 newStep.children[2].firstChild.value = step[2]
-
                 // fazer switch case para introduzir na linha os inputs da ação selecionada
                 switch (step[2]) {
                     case 'focus': newStep.appendChild(mamboGridElements.focusTemplate())
@@ -330,10 +310,8 @@
                     case 'chrome-new-tab': newStep.appendChild(mamboGridElements.newTabTemplate())
                         break;
                 }
-
                 // selecionar os inputs que existem na template
                 const actionInputsWrappers = newStep.children[3].firstChild.children
-
                 // array para guardar os valores para os inputs da ação selecioanda
                 const actionInputs = [];
                 for (isInput of actionInputsWrappers) {
@@ -341,7 +319,6 @@
                         actionInputs.push(isInput)
                     }
                 }
-
                 // iniciar o contador no 3, porque os primeiros 3 elementos do step já estão definidos
                 let i = 3;
                 for (input of actionInputs) {
@@ -352,7 +329,6 @@
             mamboEventListeners.actionChange();
         }
     }
-
     const mamboEventListeners = {
         actionChange: function () {
             for (select of document.querySelectorAll('.step select')) {
