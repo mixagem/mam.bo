@@ -1,80 +1,69 @@
-from selenium.webdriver import Chrome
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-import selenium.webdriver.support.expected_conditions as ec
-import time
+import mamBOEngine
+import json
+
+ficheiro = open('D:\\xampp\\htdocs\\mambo\\engine\\mambots\\woo-setup.json')
+jsondata = json.load(ficheiro)
+
+# Inicializar o Chrome Driver
+driverpath = mamBOEngine.driverpath(
+    'D:\\xampp\\htdocs\\mambo\\engine\\drivers\\chromedriver.exe')
+driver, act = mamBOEngine.chromeStart(driverpath)
+
+# Inicializar o Firefox Driver
+# driverpath = mamBOEngine.driverpath(
+#     'D:\\xampp\\htdocs\\mambo\\engine\\drivers\\geckodriver.exe')
+# driver, act = mamBOEngine.firefoxStart(driverpath)
 
 
-def driverpath(path):
-    driverpath = path
-    return driverpath
+mamBOEngine.maxiWindow(driver)
 
+# Guardar o ID da janela principal, a ser utilizado em futuras funções
+# mainWindow = driver.current_window_handle
 
-def autogoStart(driverpath):
-    driver = Chrome(driverpath)
-    act = ActionChains(driver)
-    return driver, act
+# variável com o número de capturas efetuadas
+numCapturas = 0
 
+# Executa o JSON
+for step in (jsondata):
+    # executa o step
+    match (step[2]):
+        case 'focus':
+            mamBOEngine.focusEle(driver, step[3])
+        case 'write':
+            mamBOEngine.writeText(driver, act, step[3], step[4])
+        case 'clear':
+            mamBOEngine.clearText(driver, act, step[3])
+        case 'delay':
+            mamBOEngine.delay(int(step[3]))
+        case 'waitfor':
+            mamBOEngine.waitfor(driver, step[3], step[4])
+        case 'mouse-click':
+            mamBOEngine.clickEle(driver, step[3])
+        case 'mouse-over':
+            mamBOEngine.overEle(driver, act, step[3])
+        case 'chrome-goto-url':
+            mamBOEngine.goToURL(driver, step[3])
+        case 'key-backspace':
+            mamBOEngine.backspace(act, step[3])
+        case 'key-enter':
+            mamBOEngine.enter(act)
+        case 'key-tab':
+            mamBOEngine.tab(act, step[3])
+        case 'chrome-new-tab':
+            mamBOEngine.newTab(driver, step[3])
+        case 'chrome-new-window':
+            mamBOEngine.newWindow(driver, step[3])
+        case 'chrome-screen-capture':
+            numCapturas = numCapturas + 1
+            mamBOEngine.windowCapture(driver, numCapturas, step[0])
 
-def maxiWindow(driver):
-    return driver.maximize_window()
+        # case 'chrome-tab-change':
+        # case 'chrome-winow-change':
+            # adicionar loop a percorrer os tabs todos, e a guardar em array o [título da página], [url da página] e o [id do tab]
+            # adicionar input de procura c/radio button, [nome da página] ou [url da página]
 
-
-def focusEle(driver, path):
-    return driver.find_element(By.XPATH, path).click()
-
-
-def writeText(driver, act, keys, path=''):
-    if path == '':
-        return act.send_keys(keys).perform()
-    else:
-        return driver.find_element(By.XPATH, path).send_keys(Keys.CONTROL + "a"), driver.find_element(By.XPATH, path).send_keys(Keys.DELETE), driver.find_element(By.XPATH, path).send_keys(keys)
-
-
-def clearText(driver, act, path):
-    return driver.find_element(By.XPATH, path).send_keys(Keys.CONTROL + "a"), driver.find_element(By.XPATH, path).send_keys(Keys.DELETE)
-
-
-def waitfor(driver, path, text=''):
-    if (text != ''):  # max timeout v                           Selecionar o elemento v         v texto do elemento
-        return WebDriverWait(driver, 100).until(ec.text_to_be_present_in_element((By.XPATH, path), text))
-
-
-def delay(s):
-    return time.sleep(s)
-
-
-def clickEle(driver, path):
-    return driver.find_element(By.XPATH, path).click()
-
-
-def overEle(driver, act, path):
-    return act.move_to_element(driver.find_element(By.XPATH, path)).perform()
-
-
-def goToURL(driver, url):
-    return driver.get(url)
-
-
-def backspace(act, n):
-    i = 1
-    n = int(n)
-    while i <= n:
-        act.send_keys(Keys.BACKSPACE).perform()
-        i += 1
-    return
-
-
-def enter(act):
-    return act.send_keys(Keys.ENTER).perform()
-
-
-def tab(act, n):
-    i = 1
-    n = int(n)
-    while i <= n:
-        act.send_keys(Keys.TAB).perform()
-        i += 1
-    return
+    # delay entre os vários steps
+    mamBOEngine.delay(1)
+    
+# fecha todas as janelas associadas com o bot (pode vir a ser um parametro opcional)
+driver.quit();

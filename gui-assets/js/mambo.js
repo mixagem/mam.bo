@@ -34,7 +34,9 @@
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Delay', 'delay'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Esperar por', 'waitfor'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Navegar para URL', 'chrome-goto-url'));
+            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Nova janela', 'chrome-new-window'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Novo separador', 'chrome-new-tab'));
+            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Tirar captura da janela', 'chrome-screen-capture'));
             return linha
         },
         // elemento genérico col-x para fazer espaçamento
@@ -132,6 +134,15 @@
         newTabTemplate: function () {
             return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('URL destino <span>(do novo separador)</span>'), mamboGridElements.lastDiv()])
         },
+        // template para a ação abrir nova janela
+        newWindowTemplate: function () {
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('URL destino <span>(da nova janela)</span>'), mamboGridElements.lastDiv()])
+        },
+        // template para a ação tirar captura de janela
+        newWindowCaptureTemplate: function () {
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.lastDiv()])
+        },
+
         // template para a ação trocar de separador
         changeTabTemplate: function () {
             return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Identificação do separador'), mamboGridElements.lastDiv()])
@@ -178,6 +189,10 @@
                 case 'chrome-goto-url': actionRow.appendChild(mamboGridElements.goToURLTemplate())
                     break;
                 case 'chrome-new-tab': actionRow.appendChild(mamboGridElements.newTabTemplate())
+                    break;
+                    case 'chrome-new-window': actionRow.appendChild(mamboGridElements.newWindowTemplate())
+                    break;
+                    case 'chrome-screen-capture': actionRow.appendChild(mamboGridElements.newWindowCaptureTemplate())
                     break;
             }
         },
@@ -360,6 +375,10 @@
                     case 'chrome-goto-url': newStep.appendChild(mamboGridElements.goToURLTemplate())
                         break;
                     case 'chrome-new-tab': newStep.appendChild(mamboGridElements.newTabTemplate())
+                        break;
+                    case 'chrome-new-window': newStep.appendChild(mamboGridElements.newWindowTemplate())
+                        break;
+                    case 'chrome-screen-capture': newStep.appendChild(mamboGridElements.newWindowCaptureTemplate())
                         break;
                 }
                 // selecionar os inputs que existem na template
