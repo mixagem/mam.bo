@@ -1,0 +1,1 @@
+[["1","","chrome-goto-url","http://mambosinfinitos.pt/leggera/v1-28/"],["2","","delay","2"],["3","","focus","//*[@id=\"username\"]"],["4","","write","adminze",""],["5","","clear","//*[@id=\"username\"]"],["6","","key-tab","1"],["7","","write","123",""],["8","","key-enter"],["9","","write","caray","//*[@id=\"username\"]"],["10","","mouse-over","//*[@id=\"show-password\"]"]]

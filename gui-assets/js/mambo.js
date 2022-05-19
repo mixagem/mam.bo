@@ -24,14 +24,15 @@
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Elemento: Focar', 'focus'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Elemento: Escrever texto', 'write'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Elemento: Limpar texto', 'clear'));
-            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'MAMBO: Delay', 'delay'));
-            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'MAMBO: Esperar por', 'waitfor'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Mouse: Click', 'mouse-click'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Mouse: Over', 'mouse-over'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Tecla: Backspace', 'key-backspace'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Tecla: Enter', 'key-enter'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Tecla: Tab', 'key-tab'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Alternar janela', 'chrome-window-change'));
+            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Alternar separador', 'chrome-tab-change'));
+            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Delay', 'delay'));
+            actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Esperar por', 'waitfor'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Navegar para URL', 'chrome-goto-url'));
             actionSelect.appendChild(mamboGridFunctions.ele('option', '', '', 'Chrome: Novo separador', 'chrome-new-tab'));
             return linha
@@ -89,7 +90,7 @@
         },
         // template para a ação limpar
         clearTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('XPATH <span>(opcional)</span>'), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('XPATH'), mamboGridElements.lastDiv()])
         },
         // template para a ação delay
         delayTemplate: function () {
@@ -117,10 +118,10 @@
         },
         // template para a ação tab
         pressTabTemplate: function () {
-            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.lastDiv()])
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Tabs <span>(default = 1)</span>', 1), mamboGridElements.lastDiv()])
         },
         // template para a ação alternar janela
-        changeTabTemplate: function () {
+        changeWindowTemplate: function () {
             return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Identificação da janela'), mamboGridElements.lastDiv()])
         },
         // template para a ação navegar para url
@@ -131,6 +132,10 @@
         newTabTemplate: function () {
             return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('URL destino <span>(do novo separador)</span>'), mamboGridElements.lastDiv()])
         },
+        // template para a ação trocar de separador
+        changeTabTemplate: function () {
+            return mamboGridElements.mergeToTemplate([mamboGridElements.blank(1), mamboGridElements.input('Identificação do separador'), mamboGridElements.lastDiv()])
+        }
     }
     const mamboGridFunctions = {
         // limpa os inputs da ação anterior
@@ -166,7 +171,9 @@
                     break;
                 case 'key-tab': actionRow.appendChild(mamboGridElements.pressTabTemplate())
                     break;
-                case 'chrome-window-change': actionRow.appendChild(mamboGridElements.changeTabTemplate())
+                case 'chrome-window-change': actionRow.appendChild(mamboGridElements.changeWindowTemplate())
+                    break;
+                case 'chrome-tab-change': actionRow.appendChild(mamboGridElements.changeTabTemplate())
                     break;
                 case 'chrome-goto-url': actionRow.appendChild(mamboGridElements.goToURLTemplate())
                     break;
@@ -192,7 +199,7 @@
         removeStep: function (e) {
             // verificar se é o último step
             const allSteps = document.querySelector('#my-steps-container').children
-            if (allSteps.length <= 1) { 
+            if (allSteps.length <= 1) {
                 alert('Não posso remover o último passo')
                 return
             }
@@ -346,7 +353,9 @@
                         break;
                     case 'key-tab': newStep.appendChild(mamboGridElements.pressTabTemplate())
                         break;
-                    case 'chrome-window-change': newStep.appendChild(mamboGridElements.changeTabTemplate())
+                    case 'chrome-window-change': newStep.appendChild(mamboGridElements.changeWindowTemplate())
+                        break;
+                    case 'chrome-tab-change': newStep.appendChild(mamboGridElements.changeTabTemplate())
                         break;
                     case 'chrome-goto-url': newStep.appendChild(mamboGridElements.goToURLTemplate())
                         break;
